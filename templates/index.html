@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center text-center mb-5">
+        <div class="col-md-8">
+            <h1 class="display-4 mb-4">Smart Urban Drainage Management</h1>
+            <p class="lead">Report drainage issues in your area and help maintain a clean and efficient drainage system.</p>
+            {% if not current_user.is_authenticated %}
+                <div class="mt-4">
+                    <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg me-3">Login</a>
+                    <a href="{{ url_for('register') }}" class="btn btn-outline-primary btn-lg">Register</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Report Issues</h5>
+                    <p class="card-text">Upload photos and descriptions of drainage problems in your area. Our AI system will verify if it's a genuine drainage issue.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Real-time Updates</h5>
+                    <p class="card-text">Track the status of your reported issues. Workers provide updates within 48 hours, ensuring timely resolution.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Priority Management</h5>
+                    <p class="card-text">Issues are automatically prioritized based on severity and number of reports. Similar issues in the same area are grouped together.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if current_user.is_authenticated and current_user.role == 'citizen' %}
+    <div class="row justify-content-center mt-4">
+        <div class="col-md-6 text-center">
+            <a href="{{ url_for('report') }}" class="btn btn-primary btn-lg">Report a New Issue</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

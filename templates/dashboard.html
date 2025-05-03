@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">Dashboard</h2>
+        
+        {% if current_user.role == 'officer' %}
+        <div class="mb-4">
+            <h4>Report Statistics</h4>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Reports</h5>
+                            <p class="card-text h2">{{ reports|length }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Pending</h5>
+                            <p class="card-text h2">{{ reports|selectattr('status', 'equalto', 'pending')|list|length }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">In Progress</h5>
+                            <p class="card-text h2">{{ reports|selectattr('status', 'equalto', 'in_progress')|list|length }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Resolved</h5>
+                            <p class="card-text h2">{{ reports|selectattr('status', 'equalto', 'resolved')|list|length }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header">
+                <h4>Reports</h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Image</th>
+                                <th>Description</th>
+                                <th>Location</th>
+                                <th>Status</th>
+                                <th>Reported By</th>
+                                <th>Created At</th>
+                                <th>Last Update</th>
+                                <th>Priority</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for report in reports %}
+                            <tr>
+                                <td>{{ report.id }}</td>
+                                <td>
+                                    <img src="{{ url_for('static', filename=report.image_path) }}" 
+                                         alt="Report Image" 
+                                         style="max-width: 100px; max-height: 100px;">
+                                </td>
+                                <td>{{ report.description }}</td>
+                                <td>
+                                    <a href="https://www.google.com/maps?q={{ report.latitude }},{{ report.longitude }}" 
+                                       target="_blank">
+                                        View on Map
+                                    </a>
+                                </td>
+                                <td>
+                                    <span class="badge {% if report.status == 'pending' %}bg-warning
+                                                      {% elif report.status == 'in_progress' %}bg-info
+                                                      {% else %}bg-success{% endif %}">
+                                        {{ report.status }}
+                                    </span>
+                                </td>
+                                <td>{{ report.reporter.username }}</td>
+                                <td>{{ report.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>{{ report.last_update.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>
+                                    <span class="badge bg-danger">{{ report.priority }}</span>
+                                </td>
+                                <td>
+                                    {% if current_user.role == 'officer' %}
+                                        <select class="form-select form-select-sm mb-2" 
+                                                onchange="assignWorker({{ report.id }}, this.value)">
+                                            <option value="">Assign Worker</option>
+                                            {% for worker in workers %}
+                                                <option value="{{ worker.id }}">{{ worker.username }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    {% endif %}
+                                    
+                                    {% if current_user.role in ['worker', 'officer'] %}
+                                        <select class="form-select form-select-sm" 
+                                                onchange="updateStatus({{ report.id }}, this.value)">
+                                            <option value="">Update Status</option>
+                                            <option value="pending">Pending</option>
+                                            <option value="in_progress">In Progress</option>
+                                            <option value="resolved">Resolved</option>
+                                        </select>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function updateStatus(reportId, status) {
+    fetch(`/update_report/${reportId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `status=${status}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+
+function assignWorker(reportId, workerId) {
+    fetch(`/assign_worker/${reportId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `worker_id=${workerId}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+
+// Check for reports that need attention (48-hour rule)
+document.addEventListener('DOMContentLoaded', function() {
+    const reports = document.querySelectorAll('tr');
+    reports.forEach(report => {
+        const lastUpdate = new Date(report.querySelector('td:nth-last-child(2)').textContent);
+        const now = new Date();
+        const hoursDiff = (now - lastUpdate) / (1000 * 60 * 60);
+        
+        if (hoursDiff >= 48 && report.querySelector('td:nth-last-child(3)').textContent.trim() !== 'resolved') {
+            report.classList.add('table-warning');
+        }
+    });
+});
+</script>
+{% endblock %} 

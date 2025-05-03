@@ -1,0 +1,76 @@
+/* Custom styles */
+.table-warning {
+    background-color: #fff3cd !important;
+}
+
+.card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn {
+    border-radius: 5px;
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+}
+
+/* Map container styles */
+#map {
+    border-radius: 5px;
+    border: 1px solid #dee2e6;
+}
+
+/* Image preview styles */
+.img-preview {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+/* Status badge styles */
+.badge {
+    padding: 0.5em 0.75em;
+    font-weight: 500;
+}
+
+/* Priority indicator styles */
+.priority-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 5px;
+}
+
+.priority-1 { background-color: #28a745; }
+.priority-2 { background-color: #17a2b8; }
+.priority-3 { background-color: #ffc107; }
+.priority-4 { background-color: #fd7e14; }
+.priority-5 { background-color: #dc3545; }
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .table-responsive {
+        font-size: 0.9rem;
+    }
+    
+    .btn-lg {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+    }
+} 
